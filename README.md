@@ -59,6 +59,14 @@ pnpm desktop:build
 pnpm test:ai
 ```
 
+当前 `test:ai` 覆盖：
+
+- 定时点击参数修改、启动、停止。
+- 录制按钮状态切换。
+- 脚本步骤新增、选择、编辑和删除。
+- 脚本库、运行日志、权限请求入口。
+- 980px 最小桌面窗口下无横向布局溢出。
+
 打包产物会生成在：
 
 ```text
@@ -124,6 +132,8 @@ pnpm test:ai
 cd src-tauri && cargo check
 pnpm desktop:build
 ```
+
+本机如果设置了 `http_proxy` / `all_proxy`，Playwright 配置会为 `localhost` / `127.0.0.1` 设置 `NO_PROXY`，避免自动化测试误走代理。
 
 ## 后续可做
 

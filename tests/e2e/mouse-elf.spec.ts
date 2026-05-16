@@ -44,4 +44,41 @@ test.describe("鼠标脚本精灵 agent smoke", () => {
     await page.getByRole("button", { name: "请求授权" }).click();
     await expect(page.getByText("请在 Tauri 桌面模式中请求")).toBeVisible();
   });
+
+  test("timeline steps can be created, edited, selected, and deleted", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByRole("button", { name: "添加移动动作" }).click();
+    await expect(page.getByText("新移动动作")).toBeVisible();
+    await page.getByRole("button", { name: "添加点击动作" }).click();
+    await expect(page.getByText("新点击动作")).toBeVisible();
+    await page.getByRole("button", { name: "添加等待动作" }).click();
+    await expect(page.getByText("新等待动作")).toBeVisible();
+    await page.getByRole("button", { name: "添加滚动动作" }).click();
+    await expect(page.getByText("新滚动动作")).toBeVisible();
+
+    await page.getByLabel("动作名称").fill("等待接口完成");
+    await expect(page.getByText("等待接口完成")).toBeVisible();
+
+    await page.getByRole("button", { name: /左键点击/ }).click();
+    await page.getByLabel("动作名称").fill("确认按钮点击");
+    await page.getByLabel("X 坐标").fill("900");
+    await page.getByLabel("Y 坐标").fill("520");
+    await expect(page.getByText("确认按钮点击")).toBeVisible();
+    await expect(page.getByText("x:900 y:520 · left")).toBeVisible();
+
+    await page.getByRole("button", { name: "删除当前步骤" }).click();
+    await expect(page.getByText("确认按钮点击")).toHaveCount(0);
+  });
+
+  test("minimum desktop viewport has no horizontal layout overflow", async ({ page }) => {
+    await page.setViewportSize({ width: 980, height: 640 });
+    await page.goto("/");
+
+    await expect(page.getByRole("heading", { name: "鼠标脚本精灵" })).toBeVisible();
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+  });
 });

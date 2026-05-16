@@ -55,6 +55,8 @@ pnpm test:ai
 cd src-tauri && cargo check
 ```
 
+`pnpm test:ai` 是给 Codex/CI 使用的 Playwright 端到端检查，覆盖定时点击、录制按钮、步骤增删改查、权限入口和最小窗口布局。测试失败时先看 UI 可访问性、按钮可定位性和代理绕过配置，不要只改断言。
+
 改动 Tauri/Rust 侧时优先再跑：
 
 ```bash

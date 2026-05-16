@@ -576,6 +576,7 @@ export default function Home() {
               <p className="text-xs text-muted-foreground">编辑当前脚本动作</p>
             </div>
             <Button
+              aria-label="删除当前步骤"
               variant="ghost"
               size="icon-sm"
               onClick={removeSelectedStep}
@@ -590,6 +591,7 @@ export default function Home() {
               <div className="flex flex-col gap-2">
                 <label className="text-xs text-muted-foreground">动作名称</label>
                 <Input
+                  aria-label="动作名称"
                   value={selectedStep.label}
                   onChange={(event) =>
                     setSteps((current) =>
