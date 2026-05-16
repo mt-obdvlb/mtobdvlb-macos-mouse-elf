@@ -1,6 +1,13 @@
 use enigo::{
   Axis, Button as EnigoButton, Coordinate, Direction, Enigo, Mouse, Settings,
 };
+#[cfg(target_os = "macos")]
+use core_foundation::{
+  base::TCFType,
+  boolean::CFBoolean,
+  dictionary::{CFDictionary, CFDictionaryRef},
+  string::CFString,
+};
 use rdev::{listen, Button as RdevButton, Event, EventType};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -17,6 +24,8 @@ pub fn run() {
   tauri::Builder::default()
     .manage(AutomationState::default())
     .invoke_handler(tauri::generate_handler![
+      accessibility_permission_status,
+      request_accessibility_permission,
       start_auto_click,
       stop_auto_click,
       start_recording,
@@ -36,6 +45,16 @@ pub fn run() {
     })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
+}
+
+#[tauri::command]
+fn accessibility_permission_status() -> bool {
+  accessibility_trusted(false)
+}
+
+#[tauri::command]
+fn request_accessibility_permission() -> bool {
+  accessibility_trusted(true)
 }
 
 struct AutomationState {
@@ -442,4 +461,27 @@ fn describe_step(step: &ScriptStep) -> String {
 
 fn lock_error<T>(error: std::sync::PoisonError<T>) -> String {
   error.to_string()
+}
+
+#[cfg(target_os = "macos")]
+fn accessibility_trusted(prompt: bool) -> bool {
+  #[link(name = "ApplicationServices", kind = "framework")]
+  extern "C" {
+    fn AXIsProcessTrusted() -> bool;
+    fn AXIsProcessTrustedWithOptions(options: CFDictionaryRef) -> bool;
+  }
+
+  if !prompt {
+    return unsafe { AXIsProcessTrusted() };
+  }
+
+  let key = CFString::new("AXTrustedCheckOptionPrompt");
+  let value = CFBoolean::true_value();
+  let options = CFDictionary::from_CFType_pairs(&[(key, value)]);
+  unsafe { AXIsProcessTrustedWithOptions(options.as_concrete_TypeRef()) }
+}
+
+#[cfg(not(target_os = "macos"))]
+fn accessibility_trusted(_prompt: bool) -> bool {
+  true
 }

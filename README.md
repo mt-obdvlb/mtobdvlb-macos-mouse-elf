@@ -9,6 +9,8 @@
 - 鼠标行为录制：通过全局监听记录移动、点击、滚轮和等待动作。
 - 脚本工作台 UI：时间线、脚本库、运行日志、右侧步骤检查器。
 - macOS 打包：可生成 `.app` 和 `.dmg`。
+- 应用内权限请求：可从右侧检查器主动触发 macOS 辅助功能授权弹窗。
+- 自动化测试：提供 `pnpm test:ai` 给 Codex/CI 跑端到端工作流检查。
 
 ## 技术栈
 
@@ -51,6 +53,12 @@ pnpm build
 pnpm desktop:build
 ```
 
+自动化 agent 测试：
+
+```bash
+pnpm test:ai
+```
+
 打包产物会生成在：
 
 ```text
@@ -61,6 +69,11 @@ src-tauri/target/release/bundle/dmg/
 ## macOS 权限
 
 真实鼠标点击和全局录制需要 macOS 辅助功能权限。
+
+应用右侧检查器提供两个按钮：
+
+- `请求授权`：在 Tauri 桌面模式下调用系统 API 发起 macOS 辅助功能授权请求。
+- `重新检测`：重新读取当前进程是否已获得辅助功能权限。
 
 开发模式下通常要给启动它的终端授权：
 
@@ -95,6 +108,8 @@ Rust 后端暴露的 Tauri 命令：
 - `stop_recording`
 - `playback_script`
 - `automation_status`
+- `accessibility_permission_status`
+- `request_accessibility_permission`
 
 前端通过 `@tauri-apps/api/core` 的 `invoke` 调用这些命令；在普通浏览器预览时会退回到本地模拟状态，方便调 UI。
 
@@ -105,6 +120,7 @@ Rust 后端暴露的 Tauri 命令：
 ```bash
 pnpm lint
 pnpm build
+pnpm test:ai
 cd src-tauri && cargo check
 pnpm desktop:build
 ```

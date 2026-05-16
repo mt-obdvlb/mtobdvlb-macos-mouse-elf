@@ -27,6 +27,7 @@ pnpm dev
 pnpm desktop:dev
 pnpm lint
 pnpm build
+pnpm test:ai
 cd src-tauri && cargo check
 pnpm desktop:build
 ```
@@ -41,7 +42,7 @@ pnpm desktop:build
 
 ## macOS 权限注意
 
-真实点击和全局录制依赖系统辅助功能权限。开发模式下要给启动进程的终端授权，打包后要给 `.app` 授权。没有权限时不要误判为代码逻辑失败。
+真实点击和全局录制依赖系统辅助功能权限。开发模式下要给启动进程的终端授权，打包后要给 `.app` 授权。应用内 `请求授权` 按钮会调用 macOS `AXIsProcessTrustedWithOptions` 发起系统请求；没有权限时不要误判为代码逻辑失败。
 
 ## 验收要求
 
@@ -50,6 +51,7 @@ pnpm desktop:build
 ```bash
 pnpm lint
 pnpm build
+pnpm test:ai
 cd src-tauri && cargo check
 ```
 

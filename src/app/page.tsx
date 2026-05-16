@@ -27,7 +27,7 @@ import {
   Wand2,
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -136,6 +136,8 @@ export default function Home() {
     mode: "idle",
     last_action: "本地预览模式",
   });
+  const [accessibilityGranted, setAccessibilityGranted] = useState(false);
+  const [permissionMessage, setPermissionMessage] = useState("Web 预览未检测");
 
   const selectedStep = steps.find((step) => step.id === selectedStepId) ?? steps[0];
   const totalDuration = useMemo(
@@ -144,12 +146,39 @@ export default function Home() {
   );
   const progressValue = isPlaying ? 62 : isRecording ? 34 : isClicking ? 48 : 0;
 
+  useEffect(() => {
+    void refreshAccessibilityPermission();
+  }, []);
+
+  async function refreshAccessibilityPermission() {
+    const granted = await callTauri<boolean>("accessibility_permission_status");
+    if (granted === null) {
+      setAccessibilityGranted(false);
+      setPermissionMessage("Web 预览");
+      return;
+    }
+
+    setAccessibilityGranted(granted);
+    setPermissionMessage(granted ? "已授权" : "待授权");
+  }
+
+  async function requestAccessibilityPermission() {
+    const granted = await callTauri<boolean>("request_accessibility_permission");
+    if (granted === null) {
+      setPermissionMessage("请在 Tauri 桌面模式中请求");
+      return;
+    }
+
+    setAccessibilityGranted(granted);
+    setPermissionMessage(granted ? "已授权" : "已发起系统请求");
+  }
+
   async function startClicker() {
     setIsClicking(true);
     const nextStatus =
       (await callTauri<AutomationStatus>("start_auto_click", {
         config: {
-          interval_ms: Math.round(intervalSeconds * 1000),
+          intervalMs: Math.round(intervalSeconds * 1000),
           button,
           repeat,
         },
@@ -428,6 +457,15 @@ export default function Home() {
                         key={kind}
                         variant="secondary"
                         size="sm"
+                        aria-label={`添加${
+                          kind === "move"
+                            ? "移动"
+                            : kind === "click"
+                              ? "点击"
+                              : kind === "wait"
+                                ? "等待"
+                                : "滚动"
+                        }动作`}
                         onClick={() => addStep(kind)}
                       >
                         <Plus data-icon="inline-start" />
@@ -652,8 +690,21 @@ export default function Home() {
                     <Gauge />
                     权限
                   </div>
-                  <p className="mt-2 text-sm">待申请</p>
+                  <p className="mt-2 text-sm">
+                    {accessibilityGranted ? "已授权" : permissionMessage}
+                  </p>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" onClick={requestAccessibilityPermission}>
+                  <ShieldCheck data-icon="inline-start" />
+                  请求授权
+                </Button>
+                <Button variant="secondary" onClick={refreshAccessibilityPermission}>
+                  <Gauge data-icon="inline-start" />
+                  重新检测
+                </Button>
               </div>
             </div>
           ) : (

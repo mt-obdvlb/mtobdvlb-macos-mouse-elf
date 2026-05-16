@@ -25,3 +25,4 @@ tauri = { version = "2.11.1", features = [] }
 tauri-plugin-log = "2"
 enigo = "0.3.0"
 rdev = "0.5.3"
+core-foundation = "0.9.4"
