@@ -1,5 +1,60 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# AGENTS.md
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+## 回答和协作
+
+- 默认用中文回答。
+- 站在程序员视角说清楚原因、证据、命令和取舍。
+- 不确定时先读代码和运行命令，不要凭印象改。
+
+## 包管理
+
+- Node.js 相关命令使用 `pnpm`。
+- Python 相关命令使用 `uv`。
+- 不要引入 npm/yarn/bun lockfile。
+
+## 项目栈
+
+- 桌面端：Tauri 2。
+- 前端：Next.js 16 App Router。
+- UI：shadcn/ui + Tailwind CSS v4。
+- 鼠标输入模拟：`enigo`。
+- 全局鼠标事件监听：`rdev`。
+
+## 开发命令
+
+```bash
+pnpm dev
+pnpm desktop:dev
+pnpm lint
+pnpm build
+cd src-tauri && cargo check
+pnpm desktop:build
+```
+
+## 代码约定
+
+- 前端交互组件需要 `"use client"`。
+- shadcn/ui 组件源码在 `src/components/ui/`，新增组件用 `pnpm dlx shadcn@latest add ...`。
+- Tauri 命令集中放在 `src-tauri/src/lib.rs`，前端通过 `invoke` 调用。
+- Next 需要静态导出给 Tauri 使用，保留 `next.config.ts` 里的 `output: "export"`。
+- 不要提交构建产物：`.next/`、`out/`、`src-tauri/target/`。
+
+## macOS 权限注意
+
+真实点击和全局录制依赖系统辅助功能权限。开发模式下要给启动进程的终端授权，打包后要给 `.app` 授权。没有权限时不要误判为代码逻辑失败。
+
+## 验收要求
+
+提交前至少跑：
+
+```bash
+pnpm lint
+pnpm build
+cd src-tauri && cargo check
+```
+
+改动 Tauri/Rust 侧时优先再跑：
+
+```bash
+pnpm desktop:build
+```
