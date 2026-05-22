@@ -35,6 +35,7 @@ pnpm desktop:build
 ## 代码约定
 
 - 前端交互组件需要 `"use client"`。
+- 左侧导航是实际功能分区，不是装饰栏；`任务`、`录制`、`脚本库`、`设置` 的内容不要重新混回一个首页。
 - shadcn/ui 组件源码在 `src/components/ui/`，新增组件用 `pnpm dlx shadcn@latest add ...`。
 - Tauri 命令集中放在 `src-tauri/src/lib.rs`，前端通过 `invoke` 调用。
 - Next 需要静态导出给 Tauri 使用，保留 `next.config.ts` 里的 `output: "export"`。
@@ -55,7 +56,7 @@ pnpm test:ai
 cd src-tauri && cargo check
 ```
 
-`pnpm test:ai` 是给 Codex/CI 使用的 Playwright 端到端检查，覆盖定时点击、录制按钮、步骤增删改查、权限入口和最小窗口布局。测试失败时先看 UI 可访问性、按钮可定位性和代理绕过配置，不要只改断言。
+`pnpm test:ai` 是给 Codex/CI 使用的 Playwright 端到端检查，覆盖定时点击、左侧分区导航、录制按钮、步骤增删改查、权限入口和最小窗口布局。测试失败时先看 UI 可访问性、按钮可定位性、信息架构是否被重新混杂，以及代理绕过配置，不要只改断言。
 
 改动 Tauri/Rust 侧时优先再跑：
 
