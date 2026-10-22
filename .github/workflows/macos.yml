@@ -1,0 +1,9 @@
+name: macOS
+on: [push, pull_request]
+jobs:
+  native:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build, test and bundle
+        run: ./script/check.sh

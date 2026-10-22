@@ -41,3 +41,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Native macOS build and migration cache
+/.build/
+/.swiftpm/
+/dist/
+/.legacy-backup/
+/src-tauri/
