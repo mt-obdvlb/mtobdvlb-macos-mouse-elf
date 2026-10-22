@@ -12,7 +12,7 @@
 
 生成并打开 `dist/MouseElf.app`，Dock 显示“鼠标精灵”。该路径链接到缓存目录中已签名的应用，避免桌面同步附加元数据破坏签名。可将实际应用复制到“应用程序”目录后长期使用。首次使用需要在**设置**页分别检查辅助功能和输入监控；刚授权后若系统要求，退出并重新打开应用。
 
-应用保持运行时，即使切换到其他应用或关闭主窗口，全局快捷键与菜单栏仍可控制任务。菜单栏可重新打开主窗口；退出应用会先停止任务、松开持有输入并保存工作区。
+应用保持运行时，即使切换到其他应用或用 `⌘W` 关闭主窗口，全局快捷键与菜单栏仍可控制任务。点击 Dock 图标、再次打开应用，或使用菜单栏的“打开鼠标精灵”都能恢复主窗口；应用内也可选择“窗口 → 打开鼠标精灵”（`⌘0`）。退出应用会先停止任务、松开持有输入并保存工作区。
 
 ## 四个功能分区
 
@@ -76,13 +76,13 @@
 
 `script/swift.sh` 使用系统 SwiftPM，将构建缓存放在 `~/Library/Caches/MouseElf/`，避免桌面/iCloud 文件同步附加 Finder 元数据导致测试包签名失败。可用 `MOUSE_ELF_BUILD_DIR` 覆盖缓存目录；源码不受此处理影响。
 
-单元测试以注入的输入 driver 验证执行完成、双击状态、取消倒计时、暂停等待、互斥、异常清理、持有输入释放、多屏角落停止、零延迟循环和修饰键；同时验证脚本 CRUD、导入边界、损坏文件保护与保存重载。测试不发送真实系统输入，真实操作仍需在授权后的应用中验收。
+单元测试以注入的输入 driver 验证执行完成、双击状态、取消倒计时、暂停等待、互斥、异常清理、持有输入释放、多屏角落停止、零延迟循环和修饰键；同时验证脚本 CRUD、导入边界、损坏文件保护、保存重载，以及关闭/释放窗口后的重建和最小化恢复。测试不发送真实系统输入，真实操作仍需在授权后的应用中验收。
 
 `./script/input_probe.sh` 可打开独立的本地输入靶场，供人工或电脑控制验收真实点击、文本、拖拽和滚动。它只接收事件，不请求权限、不发送输入，统计和 Quartz 目标坐标写入 `/tmp/mouse-elf-probe.json`。应用支持 `open -n dist/MouseElf.app --args --workspace /tmp/mouse-elf-test-workspace.json` 隔离验收数据。
 
 GitHub Actions 在 macOS 上运行构建、单测和打包检查。Codex 的 Run 按钮已绑定 `script/build_and_run.sh`。
 
-本机已通过 31 项单元测试、Release 构建与签名校验，并在独立靶场完成真实连点、中文/emoji 输入、拖拽及三阶段滚动回放；物理全局快捷键已验证能生成并保存录制脚本。验收坐标取自靶场实时窗口位置，验收数据与日常工作区隔离。
+本机已通过 36 项单元测试、Release 构建与签名校验；主窗口连续关闭后重新打开及最小化恢复已在真实应用中验证。此前已在独立靶场完成真实连点、中文/emoji 输入、拖拽及三阶段滚动回放，物理全局快捷键能生成并保存录制脚本。验收坐标取自靶场实时窗口位置，验收数据与日常工作区隔离。
 
 ## 代码结构
 
@@ -90,6 +90,7 @@ GitHub Actions 在 macOS 上运行构建、单测和打包检查。Codex 的 Run
 Package.swift                        SwiftPM 入口，无外部依赖
 Sources/MouseElfCore/                 模型、验证、JSON 文件存储
 Sources/MouseElf/MouseElfApp.swift     场景、菜单、菜单栏与退出生命周期
+Sources/MouseElf/MainWindowController.swift 主窗口恢复与 SwiftUI 场景重建
 Sources/MouseElf/AppStore.swift       工作区、互斥路由、自动保存
 Sources/MouseElf/Services/            Quartz 引擎、录制、权限、Carbon 热键
 Sources/MouseElf/Views/               四分区与步骤检查器
